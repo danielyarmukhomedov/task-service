@@ -1,21 +1,41 @@
 package com.example.taskservice;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import java.util.Arrays;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tasks")
+@RequestMapping("/tasks")
 public class TaskController {
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     @GetMapping
-    public List<Task> getTasks() {
-        return Arrays.asList(
-            new Task(1L, "Изучить Docker", "Написать Dockerfile для Java-приложения", "Высокий"),
-            new Task(2L, "Запустить контейнер", "Выполнить сборку и пробросить порты", "Средний"),
-            new Task(3L, "Сдать КТ", "Подготовить скриншоты выполнения команд", "Высокий")
-        );
+    public List<Task> getAllTasks() {
+        return taskRepository.findAll();
+    }
+
+    @PostMapping
+    public Task createTask(@RequestBody Task task) {
+        return taskRepository.save(task);
+    }
+
+    @PutMapping("/{id}")
+    public Task updateTask(@PathVariable Long id, @RequestBody Task taskDetails) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        task.setTitle(taskDetails.getTitle());
+        task.setDescription(taskDetails.getDescription());
+        task.setPriority(taskDetails.getPriority());
+        return taskRepository.save(task);
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteTask(@PathVariable Long id) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+        taskRepository.delete(task);
+        return "Task with id " + id + " has been successfully deleted.";
     }
 }
