@@ -1,10 +1,20 @@
 version: "3.9"
 
 services:
+  # --- СЕРВИС 1: ШЛЮЗ (Точка входа) ---
+  gateway:
+    build: ./gateway
+    ports:
+      - "80:80"  # Единственный открытый порт
+    depends_on:
+      - api
+      - notifications
+    networks:
+      - app-network
+
+  # --- СЕРВИС 2: БЭКЕНД ЗАДАЧ (Java) ---
   api:
     build: .
-    ports:
-      - "8080:8080"
     environment:
       - DB_HOST=db
       - DB_NAME=app
@@ -12,17 +22,38 @@ services:
       - DB_PASSWORD=1234
     depends_on:
       - db
+      - redis
+    networks:
+      - app-network
 
+  # --- СЕРВИС 3: УВЕДОМЛЕНИЯ (Python) ---
+  notifications:
+    build: ./notification-service
+    # Порты не пробрасываем наружу, доступ только через Gateway
+    networks:
+      - app-network
+
+  # --- БАЗА ДАННЫХ ---
   db:
     image: postgres:16
-    ports:
-      - "5432:5432"
     environment:
       - POSTGRES_DB=app
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
     volumes:
       - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # --- КЭШ ---
+  redis:
+    image: redis:alpine
+    networks:
+      - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:
+    driver: bridge
