@@ -1,18 +1,21 @@
 version: "3.9"
 
 services:
-  # --- СЕРВИС 1: ШЛЮЗ (Точка входа) ---
+  # --- API GATEWAY + ВЕБ ИНТЕРФЕЙС ---
   gateway:
     build: ./gateway
     ports:
-      - "80:80"  # Единственный открытый порт
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html # Монтируем HTML папку внутрь веб-сервера
     depends_on:
       - api
       - notifications
+      - analytics
     networks:
       - app-network
 
-  # --- СЕРВИС 2: БЭКЕНД ЗАДАЧ (Java) ---
+  # --- СЕРВИС ЗАДАЧ (Java Spring Boot) ---
   api:
     build: .
     environment:
@@ -26,10 +29,15 @@ services:
     networks:
       - app-network
 
-  # --- СЕРВИС 3: УВЕДОМЛЕНИЯ (Python) ---
+  # --- СЕРВИС УВЕДОМЛЕНИЙ (Python FastAPI) ---
   notifications:
     build: ./notification-service
-    # Порты не пробрасываем наружу, доступ только через Gateway
+    networks:
+      - app-network
+
+  # --- СЕРВИС АНАЛИТИКИ (Чистый GoLang) ---
+  analytics:
+    build: ./analytics-service
     networks:
       - app-network
 

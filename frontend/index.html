@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Task System Ultra Dashboard</title>
+    <style>
+        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        h1 { color: #bb86fc; }
+        .container { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background-color: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #333; }
+        input, button, select { width: 100%; padding: 10px; margin-top: 10px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        button { background-color: #03dac6; color: black; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; }
+        button:hover { background-color: #00b3a6; }
+        .btn-notify { background-color: #cf6679; color: white; }
+        .btn-notify:hover { background-color: #b05264; }
+        #taskList { list-style: none; padding: 0; margin-top: 10px; }
+        .task-item { background: #252525; padding: 10px; border-bottom: 1px solid #333; margin-top: 5px; border-radius: 4px; }
+        .stat-box { font-size: 2.2em; text-align: center; color: #03dac6; font-weight: bold; padding: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Task System Ultra Dashboard</h1>
+
+    <div class="container">
+        <!-- Создание задач (Связь с микросервисом JAVA через Gateway) -->
+        <div class="card">
+            <h3>📝 Новая задача (Java Service)</h3>
+            <input type="text" id="title" placeholder="Название задачи">
+            <input type="text" id="desc" placeholder="Описание">
+            <select id="priority">
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+            <button onclick="createTask()">Создать задачу</button>
+        </div>
+
+        <!-- Уведомления (Связь с микросервисом PYTHON через Gateway) -->
+        <div class="card">
+            <h3>📧 Уведомления (Python Service)</h3>
+            <input type="email" id="email" placeholder="admin@company.com">
+            <input type="text" id="msg" placeholder="Текст сообщения">
+            <button class="btn-notify" onclick="sendNotify()">Отправить Alert</button>
+        </div>
+
+        <!-- Аналитика (Связь с новым микросервисом GO через Gateway) -->
+        <div class="card" style="grid-column: span 2;">
+            <h3>📊 Статистика (GoLang Service)</h3>
+            <div id="analytics" class="stat-box">Загрузка...</div>
+            <button onclick="loadAnalytics()">Обновить счетчик</button>
+        </div>
+
+        <!-- Список задач -->
+        <div class="card" style="grid-column: span 2;">
+            <h3>Список текущих задач</h3>
+            <ul id="taskList"></ul>
+        </div>
+    </div>
+
+    <script>
+        // Фронтенд шлет относительные запросы, так как Nginx раздает его на том же 80 порту
+        async function createTask() {
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('desc').value;
+            const priority = document.getElementById('priority').value;
+
+            await fetch('/tasks', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({title, description, priority})
+            });
+
+            // Инкрементируем счетчик в Go-сервисе при успешном создании задачи в Java
+            fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
+
+            document.getElementById('title').value = '';
+            document.getElementById('desc').value = '';
+            loadTasks();
+            setTimeout(loadAnalytics, 300);
+        }
+
+        async function sendNotify() {
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('msg').value;
+
+            await fetch('/notify', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, message})
+            });
+            alert('Уведомление успешно обработано Python-сервисом!');
+        }
+
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/analytics');
+                const data = await res.json();
+                document.getElementById('analytics').innerText = `Всего создано задач: ${data.total_tasks}`;
+            } catch (e) {
+                document.getElementById('analytics').innerText = "Сервис аналитики недоступен";
+            }
+        }
+
+        async function loadTasks() {
+            try {
+                const res = await fetch('/tasks');
+                const tasks = await res.json();
+                const list = document.getElementById('taskList');
+                list.innerHTML = '';
+                tasks.forEach(t => {
+                    list.innerHTML += `<li class="task-item"><b>${t.title}</b> — ${t.description} [Приоритет: ${t.priority}]</li>`;
+                });
+            } catch(e) {}
+        }
+
+        // Первичная инициализация при открытии страницы
+        loadTasks();
+        loadAnalytics();
+    </script>
+</body>
+</html>
