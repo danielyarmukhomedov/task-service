@@ -2,118 +2,361 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Task System Ultra Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task System Ultra Pro Dashboard</title>
     <style>
-        body { background-color: #121212; color: #e0e0e0; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        h1 { color: #bb86fc; }
-        .container { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background-color: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 1px solid #333; }
-        input, button, select { width: 100%; padding: 10px; margin-top: 10px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-        button { background-color: #03dac6; color: black; font-weight: bold; cursor: pointer; transition: 0.3s; border: none; }
-        button:hover { background-color: #00b3a6; }
-        .btn-notify { background-color: #cf6679; color: white; }
-        .btn-notify:hover { background-color: #b05264; }
-        #taskList { list-style: none; padding: 0; margin-top: 10px; }
-        .task-item { background: #252525; padding: 10px; border-bottom: 1px solid #333; margin-top: 5px; border-radius: 4px; }
-        .stat-box { font-size: 2.2em; text-align: center; color: #03dac6; font-weight: bold; padding: 10px 0; }
+        :root {
+            --bg-base: #0a0c10;
+            --surface: rgba(22, 27, 34, 0.75);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --accent-java: #bb86fc;
+            --accent-go: #03dac6;
+            --accent-python: #ff7597;
+            --text-primary: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: radial-gradient(circle at top right, #17152b 0%, var(--bg-base) 60%); color: var(--text-primary); min-height: 100vh; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; }
+        .wrapper { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 18px; }
+        .logo-group h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #bb86fc, #03dac6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .service-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--surface-border); background: var(--surface); display: flex; align-items: center; gap: 6px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #03dac6; box-shadow: 0 0 8px #03dac6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: var(--surface); border: 1px solid var(--surface-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .card h3 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .card-java h3 { color: var(--accent-java); }
+        .card-py h3 { color: var(--accent-python); }
+        .card-go h3 { color: var(--accent-go); }
+        input, select { width: 100%; padding: 12px 14px; background: rgba(13, 17, 23, 0.8); border: 1px solid var(--surface-border); border-radius: 8px; color: var(--text-primary); outline: none; transition: 0.2s; font-size: 0.875rem; }
+        input:focus, select:focus { border-color: var(--accent-java); box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2); }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.875rem; }
+        .btn-java { background: var(--accent-java); color: #0a0c10; }
+        .btn-java:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-py { background: var(--accent-python); color: #0a0c10; }
+        .btn-py:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-go { background: rgba(3, 218, 198, 0.1); color: var(--accent-go); border: 1px solid rgba(3, 218, 198, 0.3); }
+        .btn-go:hover { background: rgba(3, 218, 198, 0.2); }
+        .stat-display { text-align: center; padding: 12px; }
+        .stat-value { font-size: 2.8rem; font-weight: 700; color: var(--accent-go); line-height: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .tasks-container { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; padding: 22px; backdrop-filter: blur(12px); }
+        .tasks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .task-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
+        .task-item { background: rgba(13, 17, 23, 0.5); border: 1px solid var(--surface-border); padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .task-info h4 { font-size: 0.95rem; font-weight: 600; }
+        .task-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+        .badge-High { background: rgba(255, 117, 151, 0.15); color: #ff7597; border: 1px solid rgba(255, 117, 151, 0.3); }
+        .badge-Medium { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+        .badge-Low { background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.3); }
+        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(22, 27, 34, 0.95); border: 1px solid var(--accent-go); color: var(--text-primary); padding: 12px 20px; border-radius: 10px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); font-size: 0.875rem; z-index: 1000; }
     </style>
 </head>
 <body>
-    <h1>🚀 Task System Ultra Dashboard</h1>
-
-    <div class="container">
-        <!-- Создание задач (Связь с микросервисом JAVA через Gateway) -->
-        <div class="card">
-            <h3>📝 Новая задача (Java Service)</h3>
-            <input type="text" id="title" placeholder="Название задачи">
-            <input type="text" id="desc" placeholder="Описание">
-            <select id="priority">
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-            </select>
-            <button onclick="createTask()">Создать задачу</button>
+    <div class="wrapper">
+        <header>
+            <div class="logo-group">
+                <h1>Task System Ultra Pro</h1>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Microservices & DevSecOps Platform</p>
+            </div>
+            <div class="service-pills">
+                <div class="pill"><span class="dot"></span> Nginx:80</div>
+                <div class="pill"><span class="dot"></span> Java Core</div>
+                <div class="pill"><span class="dot"></span> Python Fast</div>
+                <div class="pill"><span class="dot"></span> Go Metrics</div>
+            </div>
+        </header>
+        <div class="grid">
+            <div class="card card-java">
+                <h3>⚡ Новая задача (Java Core)</h3>
+                <input type="text" id="title" placeholder="Имя задачи">
+                <input type="text" id="desc" placeholder="Описание задачи">
+                <select id="priority">
+                    <option value="High">Приоритет: High</option>
+                    <option value="Medium">Приоритет: Medium</option>
+                    <option value="Low">Приоритет: Low</option>
+                </select>
+                <button class="btn-java" onclick="createTask()">Добавить в PostgreSQL</button>
+            </div>
+            <div class="card card-py">
+                <h3>🔔 Alert Dispatcher (Python)</h3>
+                <input type="email" id="email" placeholder="admin@enterprise.io">
+                <input type="text" id="msg" placeholder="Текст системного события">
+                <button class="btn-py" onclick="sendNotify()">Отправить в FastAPI</button>
+            </div>
+            <div class="card card-go">
+                <h3>📊 In-Memory Analytics (Go)</h3>
+                <div class="stat-display">
+                    <div class="stat-value" id="analytics">0</div>
+                    <div class="stat-label">Всего задач в системе</div>
+                </div>
+                <button class="btn-go" onclick="loadAnalytics()">Синхронизировать метрики</button>
+            </div>
         </div>
-
-        <!-- Уведомления (Связь с микросервисом PYTHON через Gateway) -->
-        <div class="card">
-            <h3>📧 Уведомления (Python Service)</h3>
-            <input type="email" id="email" placeholder="admin@company.com">
-            <input type="text" id="msg" placeholder="Текст сообщения">
-            <button class="btn-notify" onclick="sendNotify()">Отправить Alert</button>
-        </div>
-
-        <!-- Аналитика (Связь с новым микросервисом GO через Gateway) -->
-        <div class="card" style="grid-column: span 2;">
-            <h3>📊 Статистика (GoLang Service)</h3>
-            <div id="analytics" class="stat-box">Загрузка...</div>
-            <button onclick="loadAnalytics()">Обновить счетчик</button>
-        </div>
-
-        <!-- Список задач -->
-        <div class="card" style="grid-column: span 2;">
-            <h3>Список текущих задач</h3>
-            <ul id="taskList"></ul>
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h3>Реестр задач</h3>
+                <button style="width: auto; padding: 6px 14px; background: transparent; border: 1px solid var(--surface-border); color: var(--text-muted);" onclick="loadTasks()">Обновить</button>
+            </div>
+            <ul id="taskList" class="task-list"></ul>
         </div>
     </div>
-
+    <div id="toast"></div>
     <script>
-        // Фронтенд шлет относительные запросы, так как Nginx раздает его на том же 80 порту
+        function showToast(text, color = '#03dac6') {
+            const t = document.getElementById('toast');
+            t.innerText = text;
+            t.style.borderColor = color;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
         async function createTask() {
-            const title = document.getElementById('title').value;
-            const description = document.getElementById('desc').value;
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('desc').value.trim();
             const priority = document.getElementById('priority').value;
-
-            await fetch('/tasks', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({title, description, priority})
-            });
-
-            // Инкрементируем счетчик в Go-сервисе при успешном создании задачи в Java
-            fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
-
-            document.getElementById('title').value = '';
-            document.getElementById('desc').value = '';
-            loadTasks();
-            setTimeout(loadAnalytics, 300);
+            if(!title) return showToast('Введите название задачи', '#ff7597');
+            try {
+                const res = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title, description, priority})
+                });
+                if(res.ok) {
+                    showToast('Задача сохранена в PostgreSQL!');
+                    document.getElementById('title').value = '';
+                    document.getElementById('desc').value = '';
+                    fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
+                    loadTasks();
+                    setTimeout(loadAnalytics, 250);
+                }
+            } catch(e) { showToast('Ошибка сети', '#ff7597'); }
         }
-
         async function sendNotify() {
-            const email = document.getElementById('email').value;
-            const message = document.getElementById('msg').value;
-
-            await fetch('/notify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, message})
-            });
-            alert('Уведомление успешно обработано Python-сервисом!');
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('msg').value.trim();
+            if(!email || !message) return showToast('Заполните все поля алерта', '#ff7597');
+            try {
+                const res = await fetch('/notify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, message})
+                });
+                if(res.ok) showToast('Python FastAPI залогировал алерт!');
+            } catch(e) { showToast('Ошибка вызова шлюза', '#ff7597'); }
         }
-
         async function loadAnalytics() {
             try {
                 const res = await fetch('/analytics');
                 const data = await res.json();
-                document.getElementById('analytics').innerText = `Всего создано задач: ${data.total_tasks}`;
-            } catch (e) {
-                document.getElementById('analytics').innerText = "Сервис аналитики недоступен";
-            }
+                document.getElementById('analytics').innerText = data.total_tasks;
+            } catch(e) { document.getElementById('analytics').innerText = '--'; }
         }
-
         async function loadTasks() {
             try {
                 const res = await fetch('/tasks');
                 const tasks = await res.json();
                 const list = document.getElementById('taskList');
                 list.innerHTML = '';
+                if(tasks.length === 0) {
+                    list.innerHTML = '<li style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.85rem;">Задач пока нет</li>';
+                    return;
+                }
                 tasks.forEach(t => {
-                    list.innerHTML += `<li class="task-item"><b>${t.title}</b> — ${t.description} [Приоритет: ${t.priority}]</li>`;
+                    list.innerHTML += `
+                        <li class="task-item">
+                            <div class="task-info">
+                                <h4>${t.title}</h4>
+                                <p>${t.description || 'Без описания'}</p>
+                            </div>
+                            <span class="badge badge-${t.priority}">${t.priority}</span>
+                        </li>`;
                 });
             } catch(e) {}
         }
+        loadTasks();
+        loadAnalytics();
+    </script>
+</body>
+</html><!DOCTYPE html>
 
-        // Первичная инициализация при открытии страницы
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task System Ultra Pro Dashboard</title>
+    <style>
+        :root {
+            --bg-base: #0a0c10;
+            --surface: rgba(22, 27, 34, 0.75);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --accent-java: #bb86fc;
+            --accent-go: #03dac6;
+            --accent-python: #ff7597;
+            --text-primary: #f0f6fc;
+            --text-muted: #8b949e;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: radial-gradient(circle at top right, #17152b 0%, var(--bg-base) 60%); color: var(--text-primary); min-height: 100vh; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; }
+        .wrapper { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 24px; }
+        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 18px; }
+        .logo-group h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #bb86fc, #03dac6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .service-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--surface-border); background: var(--surface); display: flex; align-items: center; gap: 6px; }
+        .dot { width: 6px; height: 6px; border-radius: 50%; background: #03dac6; box-shadow: 0 0 8px #03dac6; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: var(--surface); border: 1px solid var(--surface-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .card h3 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+        .card-java h3 { color: var(--accent-java); }
+        .card-py h3 { color: var(--accent-python); }
+        .card-go h3 { color: var(--accent-go); }
+        input, select { width: 100%; padding: 12px 14px; background: rgba(13, 17, 23, 0.8); border: 1px solid var(--surface-border); border-radius: 8px; color: var(--text-primary); outline: none; transition: 0.2s; font-size: 0.875rem; }
+        input:focus, select:focus { border-color: var(--accent-java); box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2); }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.875rem; }
+        .btn-java { background: var(--accent-java); color: #0a0c10; }
+        .btn-java:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-py { background: var(--accent-python); color: #0a0c10; }
+        .btn-py:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-go { background: rgba(3, 218, 198, 0.1); color: var(--accent-go); border: 1px solid rgba(3, 218, 198, 0.3); }
+        .btn-go:hover { background: rgba(3, 218, 198, 0.2); }
+        .stat-display { text-align: center; padding: 12px; }
+        .stat-value { font-size: 2.8rem; font-weight: 700; color: var(--accent-go); line-height: 1; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
+        .tasks-container { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; padding: 22px; backdrop-filter: blur(12px); }
+        .tasks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .task-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
+        .task-item { background: rgba(13, 17, 23, 0.5); border: 1px solid var(--surface-border); padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .task-info h4 { font-size: 0.95rem; font-weight: 600; }
+        .task-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+        .badge-High { background: rgba(255, 117, 151, 0.15); color: #ff7597; border: 1px solid rgba(255, 117, 151, 0.3); }
+        .badge-Medium { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+        .badge-Low { background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.3); }
+        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(22, 27, 34, 0.95); border: 1px solid var(--accent-go); color: var(--text-primary); padding: 12px 20px; border-radius: 10px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); font-size: 0.875rem; z-index: 1000; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <header>
+            <div class="logo-group">
+                <h1>Task System Ultra Pro</h1>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Microservices & DevSecOps Platform</p>
+            </div>
+            <div class="service-pills">
+                <div class="pill"><span class="dot"></span> Nginx:80</div>
+                <div class="pill"><span class="dot"></span> Java Core</div>
+                <div class="pill"><span class="dot"></span> Python Fast</div>
+                <div class="pill"><span class="dot"></span> Go Metrics</div>
+            </div>
+        </header>
+        <div class="grid">
+            <div class="card card-java">
+                <h3>⚡ Новая задача (Java Core)</h3>
+                <input type="text" id="title" placeholder="Имя задачи">
+                <input type="text" id="desc" placeholder="Описание задачи">
+                <select id="priority">
+                    <option value="High">Приоритет: High</option>
+                    <option value="Medium">Приоритет: Medium</option>
+                    <option value="Low">Приоритет: Low</option>
+                </select>
+                <button class="btn-java" onclick="createTask()">Добавить в PostgreSQL</button>
+            </div>
+            <div class="card card-py">
+                <h3>🔔 Alert Dispatcher (Python)</h3>
+                <input type="email" id="email" placeholder="admin@enterprise.io">
+                <input type="text" id="msg" placeholder="Текст системного события">
+                <button class="btn-py" onclick="sendNotify()">Отправить в FastAPI</button>
+            </div>
+            <div class="card card-go">
+                <h3>📊 In-Memory Analytics (Go)</h3>
+                <div class="stat-display">
+                    <div class="stat-value" id="analytics">0</div>
+                    <div class="stat-label">Всего задач в системе</div>
+                </div>
+                <button class="btn-go" onclick="loadAnalytics()">Синхронизировать метрики</button>
+            </div>
+        </div>
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h3>Реестр задач</h3>
+                <button style="width: auto; padding: 6px 14px; background: transparent; border: 1px solid var(--surface-border); color: var(--text-muted);" onclick="loadTasks()">Обновить</button>
+            </div>
+            <ul id="taskList" class="task-list"></ul>
+        </div>
+    </div>
+    <div id="toast"></div>
+    <script>
+        function showToast(text, color = '#03dac6') {
+            const t = document.getElementById('toast');
+            t.innerText = text;
+            t.style.borderColor = color;
+            t.style.display = 'block';
+            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        }
+        async function createTask() {
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('desc').value.trim();
+            const priority = document.getElementById('priority').value;
+            if(!title) return showToast('Введите название задачи', '#ff7597');
+            try {
+                const res = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({title, description, priority})
+                });
+                if(res.ok) {
+                    showToast('Задача сохранена в PostgreSQL!');
+                    document.getElementById('title').value = '';
+                    document.getElementById('desc').value = '';
+                    fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
+                    loadTasks();
+                    setTimeout(loadAnalytics, 250);
+                }
+            } catch(e) { showToast('Ошибка сети', '#ff7597'); }
+        }
+        async function sendNotify() {
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('msg').value.trim();
+            if(!email || !message) return showToast('Заполните все поля алерта', '#ff7597');
+            try {
+                const res = await fetch('/notify', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, message})
+                });
+                if(res.ok) showToast('Python FastAPI залогировал алерт!');
+            } catch(e) { showToast('Ошибка вызова шлюза', '#ff7597'); }
+        }
+        async function loadAnalytics() {
+            try {
+                const res = await fetch('/analytics');
+                const data = await res.json();
+                document.getElementById('analytics').innerText = data.total_tasks;
+            } catch(e) { document.getElementById('analytics').innerText = '--'; }
+        }
+        async function loadTasks() {
+            try {
+                const res = await fetch('/tasks');
+                const tasks = await res.json();
+                const list = document.getElementById('taskList');
+                list.innerHTML = '';
+                if(tasks.length === 0) {
+                    list.innerHTML = '<li style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.85rem;">Задач пока нет</li>';
+                    return;
+                }
+                tasks.forEach(t => {
+                    list.innerHTML += `
+                        <li class="task-item">
+                            <div class="task-info">
+                                <h4>${t.title}</h4>
+                                <p>${t.description || 'Без описания'}</p>
+                            </div>
+                            <span class="badge badge-${t.priority}">${t.priority}</span>
+                        </li>`;
+                });
+            } catch(e) {}
+        }
         loadTasks();
         loadAnalytics();
     </script>
