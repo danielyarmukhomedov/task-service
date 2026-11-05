@@ -1,90 +1,300 @@
-# Polyglot Task Management System (Ultra Edition)
+# Task Service — полиглотная система управления задачами
 
-[English Version](#english-version) | [Русская версия](#русская-версия)
+Учебный микросервисный проект для управления задачами, отправки уведомлений и сбора статистики.
 
----
+Система объединяет сервисы на Java, Python и Go. Веб-интерфейс и API доступны через Nginx. Развёртывание выполняется с помощью Docker Compose.
 
-## Русская версия
+## 1. Возможности системы
 
-Распределенная высоконагруженная микросервисная платформа для управления задачами. Проект демонстрирует паттерны Cloud-Native архитектуры, принципы DevSecOps, полиглот-программирование и интеграцию интерактивных веб-интерфейсов в изолированные контейнерные сети.
+- Создание, просмотр, редактирование и удаление задач.
+- Название, описание и приоритет задачи.
+- Отметка задачи как выполненной.
+- Поиск и фильтрация задач в интерфейсе.
+- Сохранение задач и статусов в PostgreSQL.
+- Отправка уведомлений по SMTP.
+- Просмотр полученных писем через Mailpit.
+- Отображение статистики и состояния сервисов.
 
-### 🏗 Архитектура системы (C4 Model)
+## 2. Архитектура системы
 
-![Architecture Diagram](architecture.png)
+### Схема C4
 
-Система построена на базе микросервисной архитектуры и включает в себя 4 независимых функциональных компонента, объединенных во внутреннюю изолированную сеть `app-network`:
+![Архитектура системы](architecture.png)
 
-1. **SPA Frontend (HTML5 / Vanilla JS)** — Интерактивная панель управления в стиле Dark UI, позволяющая полностью контролировать систему (создавать задачи, вызывать алерты, просматривать списки и метрики) в реальном времени прямо из браузера.
-2. **API Gateway (Nginx)** — Единственная внешняя точка входа прикладного уровня L7 (Port 80). Отвечает за безопасную раздачу статических файлов фронтенда и проксирование API по контекстным путям, скрывая внутреннюю сеть контейнеров.
-3. **Task Service (Java 11 / Spring Boot)** — Ядро бизнес-логики. Реализует CRUD-операции над задачами, интеграцию с реляционной СУБД PostgreSQL 16 и паттерн оптимизации чтения *Cache-Aside* через Redis.
-4. **Notification Service (Python 3.9 / FastAPI)** — Легковесный асинхронный сервис уведомлений (имитация отправки Email) с валидацией входящих JSON-структур при помощи Pydantic и логированием в поток stdout.
-5. **Analytics Service (GoLang 1.22)** — Высокопроизводительный микросервис на чистом Go без внешних зависимостей, обеспечивающий потоковый сбор и обработку системных метрик в оперативной памяти (In-Memory).
+[Редактируемая SVG-схема](architecture.svg) · [Исходная авторская схема](architecture-original.png)
 
-### 🔒 Безопасность и Изоляция (DevSecOps)
-В соответствии со стандартами безопасности, порты бэкенд-сервисов Java (8080), Python (8000) и Go (9000), а также баз данных PostgreSQL (5432) и Redis (6379) **полностью закрыты наружу**. Единственным публичным шлюзом является Nginx на порту 80. Все межсервисные коммуникации изолированы внутри приватной мостовой подсети Docker.
+Схема включает следующие представления:
 
-### 📦 Быстрое развертывание
+- **C1 — System Context:** пользователь и система управления задачами.
+- **C2 — Containers:** приложения, базы данных и взаимодействие между ними.
+- **C3 — Components:** Java-компоненты TaskController, TaskRepository и модель Task.
+- **Deployment:** размещение сервисов в Docker Compose.
+
+В текущем окружении Gateway опубликован на порту **8088**, внутренний порт Nginx — **80**. На изображениях, подготовленных до изменения конфигурации, внешний порт может быть указан как 80.
+
+### Взаимодействие компонентов
+
+1. Пользователь открывает SPA в браузере.
+2. Nginx раздаёт файлы интерфейса и направляет API-запросы соответствующим сервисам.
+3. Java API обрабатывает задачи и сохраняет их в PostgreSQL.
+4. Python-сервис отправляет уведомления через SMTP.
+5. Mailpit принимает письма и отображает их в веб-интерфейсе.
+6. После создания задачи интерфейс отправляет событие в Go-сервис аналитики.
+
+Сервисы взаимодействуют через Docker-сеть `app-network`.
+
+## 3. Сервисы и технологии
+
+| Сервис | Технология | Назначение |
+| --- | --- | --- |
+| gateway | Nginx | Раздача SPA и проксирование запросов |
+| api | Java 11, Spring Boot, Spring Data JPA | REST API для управления задачами |
+| db | PostgreSQL 16 | Постоянное хранение задач |
+| notifications | Python 3.12, FastAPI, smtplib | Фоновая отправка SMTP-уведомлений |
+| analytics | Go 1.22, net/http | Счётчик событий создания задач |
+| mailpit | Mailpit | Приём и просмотр тестовых писем |
+| redis | Redis | Инфраструктура для будущего кеширования |
+
+Frontend реализован на **HTML5, CSS3 и Vanilla JavaScript**.
+
+Redis присутствует в окружении, но кеширование Java API через Cache-Aside пока не реализовано.
+
+## 4. Запуск проекта
+
+### Требования
+
+- Ubuntu или другая система с Docker.
+- Docker Engine.
+- Docker Compose v2.
+- Доступ к интернету при первой сборке.
+
+Java, Maven, Python и Go для сборки проекта на хосте устанавливать не требуется.
+
+### Конфигурация портов
+
+Для адресов из этого README у сервиса `gateway` в `docker-compose.yml` должна использоваться привязка:
+
+```yaml
+ports:
+  - "127.0.0.1:8088:80"
+```
+
+У сервиса `mailpit`:
+
+```yaml
+ports:
+  - "127.0.0.1:8025:8025"
+```
+
+### Сборка и запуск
+
+Откройте терминал и выполните из каталога проекта:
 
 ```bash
 cd ~/task-service
-mvn clean package
-docker compose up -d --build
-```
-После успешного запуска откройте браузер Firefox внутри ВМ по адресу: `http://localhost`
-
-### ✅ Верификация API (Сырые JSON запросы)
-
-**1. Получить JSON-список задач (Java + Redis):**
-```bash
-curl -i http://localhost/tasks
-```
-**2. Отправить JSON-пакет уведомления (Python FastAPI):**
-```bash
-curl -i -X POST -H "Content-Type: application/json" -d '{"email":"test@univ.edu", "message":"Hello JSON"}' http://localhost/notify
-```
-**3. Проверить метрики счетчика (GoLang):**
-```bash
-curl -i http://localhost/analytics
+sudo docker compose config --quiet
+sudo docker compose up -d --build --wait --wait-timeout 600
+sudo docker compose ps -a
 ```
 
----
+Первый запуск может занять несколько минут. После запуска сервисы должны находиться в рабочем состоянии, а настроенные проверки здоровья — показывать `healthy`.
 
-## English Version
+### Адреса приложения
 
-A distributed, high-load microservice task management platform. This project demonstrates Cloud-Native architecture patterns, DevSecOps principles, polyglot programming, and the integration of interactive web interfaces into isolated container networks.
+Открывайте адреса в браузере Ubuntu, где запущены контейнеры.
 
-### 🏗 System Architecture (C4 Model)
+| Интерфейс | Адрес |
+| --- | --- |
+| Task Console | http://127.0.0.1:8088/ |
+| Mailpit через Nginx | http://127.0.0.1:8088/mail/ |
+| Mailpit напрямую | http://127.0.0.1:8025/mail/ |
 
-The system is built on a microservice architecture and includes 4 independent functional components combined into an internal isolated network named `app-network`:
+Используется протокол **HTTP**.
 
-1. **SPA Frontend (HTML5 / Vanilla JS)** — An interactive control panel in Dark UI style, allowing full system control (creating tasks, triggering alerts, viewing lists and metrics) in real-time directly from the browser.
-2. **API Gateway (Nginx)** — The single external entry point at the L7 application layer (Port 80). It handles the secure delivery of frontend static files and transparent API proxying via contextual paths, completely hiding the internal container topology.
-3. **Task Service (Java 11 / Spring Boot)** — The core of business logic. Implements CRUD operations on tasks, integration with the relational PostgreSQL 16 database, and the *Cache-Aside* read optimization pattern via Redis.
-4. **Notification Service (Python 3.9 / FastAPI)** — A lightweight asynchronous notification service (Email simulation) with incoming JSON structure validation via Pydantic and logging to the stdout stream.
-5. **Analytics Service (GoLang 1.22)** — A high-performance microservice written in pure Go without external dependencies, providing streaming metrics aggregation and processing in-memory.
+### Повторный запуск
 
-### 🔒 Security and Isolation (DevSecOps)
-In accordance with security standards, the ports of the backend services Java (8080), Python (8000), and Go (9000), as well as the databases PostgreSQL (5432) and Redis (6379), are **completely closed to the outside world**. The only public gateway is Nginx on port 80. All inter-service communications are strictly isolated within a private Docker bridge subnet.
-
-### 📦 Quick Deployment
+Если образы уже собраны:
 
 ```bash
 cd ~/task-service
-mvn clean package
-docker compose up -d --build
+sudo docker compose up -d --wait --wait-timeout 600
 ```
-After a successful startup, open the Firefox browser inside the VM at: `http://localhost`
 
-### ✅ API Verification (Raw JSON Requests)
+### Остановка
 
-**1. Get JSON task list (Java + Redis):**
 ```bash
-curl -i http://localhost/tasks
+sudo docker compose stop
 ```
-**2. Send JSON notification packet (Python FastAPI):**
+
+### Просмотр логов
+
 ```bash
-curl -i -X POST -H "Content-Type: application/json" -d '{"email":"test@univ.edu", "message":"Hello JSON"}' http://localhost/notify
+sudo docker compose logs --tail=100
 ```
-**3. Check metrics counter (GoLang):**
+
+## 5. Основные API-маршруты
+
+| Метод | Маршрут | Назначение |
+| --- | --- | --- |
+| GET | /tasks | Получить список задач |
+| POST | /tasks | Создать задачу |
+| PUT | /tasks/{id} | Изменить название, описание и приоритет |
+| PATCH | /tasks/{id}/completion | Изменить статус выполнения |
+| DELETE | /tasks/{id} | Удалить задачу |
+| POST | /notify | Поставить уведомление на отправку |
+| GET | /notify/{notification_id} | Получить статус отправки |
+| GET | /analytics | Получить счётчик событий |
+| POST | /analytics/increment | Увеличить счётчик событий |
+
+Допустимые значения приоритета: `High`, `Medium`, `Low`.
+
+## 6. Проверка через curl / Postman
+
+Команды ниже выполняются последовательно в одном терминале.
+
+### Получение списка задач
+
+**Запрос:**
+
 ```bash
-curl -i http://localhost/analytics
+curl -i http://127.0.0.1:8088/tasks
+```
+
+**Ожидаемый ответ:** HTTP `200`, JSON-массив задач. Если задач нет, возвращается `[]`.
+
+**Работа системы:** Nginx передаёт запрос Java API, приложение получает записи из PostgreSQL и возвращает результат клиенту.
+
+### Создание задачи
+
+**Запрос:**
+
+```bash
+TASK_RESPONSE=$(curl -fsS -X POST http://127.0.0.1:8088/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"Подготовить демонстрацию","description":"Проверить задачи и SMTP-уведомления","priority":"High"}')
+
+printf '%s\n' "$TASK_RESPONSE"
+
+TASK_ID=$(printf '%s\n' "$TASK_RESPONSE" | sed -n 's/.*"id":[[:space:]]*\([0-9][0-9]*\).*/\1/p')
+```
+
+**Ожидаемый ответ:** HTTP `201`, JSON созданной задачи с присвоенным `id` и полем `"completed":false`.
+
+Переменная `TASK_ID` сохраняет идентификатор для следующих проверок.
+
+**Работа системы:** Java API проверяет поля и сохраняет новую задачу в PostgreSQL.
+
+### Завершение задачи
+
+**Запрос:**
+
+```bash
+curl -i -X PATCH "http://127.0.0.1:8088/tasks/$TASK_ID/completion" \
+  -H 'Content-Type: application/json' \
+  -d '{"completed":true}'
+```
+
+**Ожидаемый ответ:** HTTP `200`, JSON задачи с полем `"completed":true`.
+
+**Работа системы:** статус обновляется в PostgreSQL. После обновления страницы задача остаётся завершённой.
+
+### Удаление задачи
+
+**Запрос:**
+
+```bash
+curl -i -X DELETE "http://127.0.0.1:8088/tasks/$TASK_ID"
+```
+
+**Ожидаемый ответ:** HTTP `204`, без тела ответа.
+
+**Работа системы:** задача удаляется из PostgreSQL и больше не возвращается в списке задач.
+
+### Отправка уведомления
+
+**Запрос:**
+
+```bash
+curl -i -X POST http://127.0.0.1:8088/notify \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"professor@example.com","subject":"Демонстрация Task Service","message":"Тестовое письмо отправлено через Python-сервис и принято Mailpit."}'
+```
+
+**Ожидаемый ответ:** HTTP `202`, идентификатор уведомления и начальный статус.
+
+**Работа системы:** FastAPI принимает запрос, запускает фоновую отправку через smtplib и передаёт письмо SMTP-серверу Mailpit.
+
+Для проверки результата откройте:
+
+http://127.0.0.1:8025/mail/
+
+В Inbox должны отображаться получатель, тема и содержимое письма.
+
+### Получение аналитики
+
+**Запрос:**
+
+```bash
+curl -i http://127.0.0.1:8088/analytics
+```
+
+**Ожидаемый ответ:** HTTP `200`, JSON с числовым полем `total_tasks`.
+
+**Работа системы:** Go-сервис возвращает текущее значение счётчика из памяти.
+
+Этот счётчик увеличивается после событий, отправленных интерфейсом. Прямой запрос `POST /tasks` через curl сам по себе его не увеличивает.
+
+### Проверка в Postman
+
+Для выполнения тех же проверок в Postman:
+
+1. Выберите HTTP-метод и укажите URL из примера.
+2. Для POST и PATCH откройте `Body → raw → JSON`.
+3. Вставьте JSON из соответствующей команды curl.
+4. Нажмите `Send`.
+5. Проверьте HTTP-статус, тело ответа и изменение данных в интерфейсе.
+
+## 7. Минимальный сценарий использования
+
+1. Открыть Task Console.
+2. Создать задачу с названием, описанием и высоким приоритетом.
+3. Найти её через поиск или фильтр.
+4. Отметить задачу выполненной.
+5. Обновить страницу и убедиться, что статус сохранился.
+6. Отправить уведомление.
+7. Открыть Mailpit и показать полученное письмо.
+8. Удалить тестовую задачу.
+
+Сценарий демонстрирует работу интерфейса, маршрутизацию через Nginx, сохранение данных в PostgreSQL и передачу уведомлений по SMTP.
+
+## 8. Хранение данных и особенности реализации
+
+- Задачи и статусы выполнения хранятся в PostgreSQL в томе `db_data`.
+- Письма Mailpit хранятся в томе `mailpit_data`.
+- Go-счётчик хранится в памяти и сбрасывается при перезапуске сервиса.
+- Удаление задач не уменьшает Go-счётчик.
+- Фоновые задания и статусы уведомлений Python не восстанавливаются после перезапуска процесса.
+- Количество задач в базе и количество событий Go могут различаться.
+
+Для сохранения данных не удаляйте тома командой `docker compose down -v`.
+
+## 9. SMTP-уведомления
+
+По умолчанию используется Mailpit:
+
+- SMTP-хост: `mailpit`.
+- SMTP-порт: `1025`.
+- Авторизация не требуется.
+- TLS в локальном режиме не используется.
+
+Письма действительно передаются по SMTP и сохраняются в Mailpit. Во внешние почтовые ящики они автоматически не отправляются.
+
+Для внешнего SMTP предусмотрены переменные `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_SSL` и `SMTP_STARTTLS`.
+
+Поддерживаются SMTP over TLS на порту 465 и STARTTLS на порту 587.
+
+## 10. Границы учебной версии
+
+Проект предназначен для локальной демонстрации микросервисной архитектуры.
+
+Аутентификация, разграничение доступа, долговечная очередь уведомлений и Redis-кеширование пока не реализованы. Перед публичным размещением необходимы TLS, управление секретами, резервное копирование и дополнительная настройка безопасности.

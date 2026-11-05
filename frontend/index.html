@@ -1,364 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task System Ultra Pro Dashboard</title>
-    <style>
-        :root {
-            --bg-base: #0a0c10;
-            --surface: rgba(22, 27, 34, 0.75);
-            --surface-border: rgba(255, 255, 255, 0.08);
-            --accent-java: #bb86fc;
-            --accent-go: #03dac6;
-            --accent-python: #ff7597;
-            --text-primary: #f0f6fc;
-            --text-muted: #8b949e;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: radial-gradient(circle at top right, #17152b 0%, var(--bg-base) 60%); color: var(--text-primary); min-height: 100vh; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; }
-        .wrapper { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 24px; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 18px; }
-        .logo-group h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #bb86fc, #03dac6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .service-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-        .pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--surface-border); background: var(--surface); display: flex; align-items: center; gap: 6px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #03dac6; box-shadow: 0 0 8px #03dac6; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); border: 1px solid var(--surface-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-        .card h3 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
-        .card-java h3 { color: var(--accent-java); }
-        .card-py h3 { color: var(--accent-python); }
-        .card-go h3 { color: var(--accent-go); }
-        input, select { width: 100%; padding: 12px 14px; background: rgba(13, 17, 23, 0.8); border: 1px solid var(--surface-border); border-radius: 8px; color: var(--text-primary); outline: none; transition: 0.2s; font-size: 0.875rem; }
-        input:focus, select:focus { border-color: var(--accent-java); box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2); }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.875rem; }
-        .btn-java { background: var(--accent-java); color: #0a0c10; }
-        .btn-java:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-py { background: var(--accent-python); color: #0a0c10; }
-        .btn-py:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-go { background: rgba(3, 218, 198, 0.1); color: var(--accent-go); border: 1px solid rgba(3, 218, 198, 0.3); }
-        .btn-go:hover { background: rgba(3, 218, 198, 0.2); }
-        .stat-display { text-align: center; padding: 12px; }
-        .stat-value { font-size: 2.8rem; font-weight: 700; color: var(--accent-go); line-height: 1; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .tasks-container { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; padding: 22px; backdrop-filter: blur(12px); }
-        .tasks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .task-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
-        .task-item { background: rgba(13, 17, 23, 0.5); border: 1px solid var(--surface-border); padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .task-info h4 { font-size: 0.95rem; font-weight: 600; }
-        .task-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
-        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-        .badge-High { background: rgba(255, 117, 151, 0.15); color: #ff7597; border: 1px solid rgba(255, 117, 151, 0.3); }
-        .badge-Medium { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
-        .badge-Low { background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.3); }
-        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(22, 27, 34, 0.95); border: 1px solid var(--accent-go); color: var(--text-primary); padding: 12px 20px; border-radius: 10px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); font-size: 0.875rem; z-index: 1000; }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090c10">
+<title>Task Console · Рабочее пространство</title>
+<style>
+:root{color-scheme:dark;--bg:#090c10;--panel:#11161c;--line:#252c34;--text:#edf2f7;--muted:#909ba9;--lime:#c5f277;--red:#ff8a93;--blue:#89baff;--amber:#edc97c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+button,a{touch-action:manipulation}button{cursor:pointer}button:disabled{opacity:.45;cursor:wait}
+a{color:inherit;text-decoration:none}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--lime);outline-offset:4px}
+button{border:1px solid var(--line);border-radius:9px;background:#1a222b;color:var(--text);padding:10px 14px;font-weight:600;transition:background .18s}
+button:hover:not(:disabled){background:#293340}.primary{background:var(--lime);color:#172014;border-color:var(--lime)}.primary:hover:not(:disabled){background:#d7ff97}
+.ghost{background:transparent}.muted{color:var(--muted)}.mono,.eyebrow{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}.eyebrow{color:var(--muted);font-size:10px;letter-spacing:1.8px;text-transform:uppercase}
+.sidebar{width:220px;position:fixed;inset:0 auto 0 0;border-right:1px solid var(--line);padding:28px 20px;display:flex;flex-direction:column;background:#0c1015}
+.brand{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:750;letter-spacing:-.4px}
+.brand-mark{width:32px;height:32px;display:grid;place-items:center;background:var(--lime);color:#172014;border-radius:9px;font-size:21px}
+.project{margin:34px 0 28px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#141a21}.project small{display:block;color:var(--muted);font-size:11px}
+nav{display:grid;gap:6px}nav a{padding:10px 12px;color:var(--muted);border-radius:8px;display:flex;align-items:center;gap:12px}nav a:hover{color:var(--text);background:#151c24}
+nav a.active{background:#202b20;color:var(--lime)}nav a span:first-child{font-size:17px;width:20px;text-align:center}
+.side-foot{margin-top:auto;border-top:1px solid var(--line);padding-top:20px;font-size:11px;color:var(--muted)}.avatar{width:29px;height:29px;border-radius:50%;background:#2a3440;display:inline-grid;place-items:center;margin-right:8px;color:#e9eef5}
+main{margin-left:220px;padding:0 36px 32px;max-width:1760px}.topbar{height:77px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:14px}
+.breadcrumb{font-size:12px;color:var(--muted)}.breadcrumb strong{color:var(--text);font-weight:500}.env{display:flex;align-items:center;gap:8px;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:#c5ced9}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--muted);display:inline-block;flex-shrink:0}.env .dot{background:var(--lime)}
+.hero{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:32px 0 25px}.hero h1{font-size:clamp(25px,3vw,37px);font-weight:650;line-height:1.2;letter-spacing:-1.4px;margin:8px 0 9px}.hero p{margin:0;color:var(--muted);font-size:13px}
+.inbox{display:inline-flex;gap:12px;align-items:center;padding:11px 16px;border:1px solid #3d5032;border-radius:9px;background:#1b2419;color:var(--lime);white-space:nowrap;font-size:12px;font-weight:600}.inbox:hover{background:#273422}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.stat{padding:18px 20px;position:relative;overflow:hidden}.stat-label{font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px}.stat-symbol{color:#677380}.stat-number{font-size:35px;letter-spacing:-1.3px;font-weight:600;line-height:1.2;margin:16px 0 9px;font-variant-numeric:tabular-nums}
+.stat small{font-size:10px;color:var(--muted)}.stat.accent{background:linear-gradient(115deg,#1e2a20,#141c18);border-color:#3a4d35}.stat.accent .stat-number{color:var(--lime)}
+.workspace{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(290px,1fr);gap:20px;margin-top:22px;align-items:stretch}.task-panel{overflow:hidden;min-height:550px;display:flex;flex-direction:column}
+.panel-head{padding:21px 22px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}h2{font-size:15px;font-weight:600;margin:0;letter-spacing:-.3px}
+.panel-head p{font-size:11px;color:var(--muted);margin:5px 0 0}.small-btn{font-size:11px;padding:7px 10px;white-space:nowrap}
+.filters{padding:16px 22px;border-bottom:1px solid var(--line);display:grid;gap:12px}.filter-row{display:flex;gap:10px}.filter-row input{min-width:0;flex:1}.filter-row select{width:145px}
+input,select,textarea{width:100%;border:1px solid #303944;border-radius:8px;background:#0b1016;color:var(--text);padding:10px 11px;font-size:12px;transition:border-color .2s}
+input::placeholder,textarea::placeholder{color:#6f7c8d}input:hover,select:hover,textarea:hover{border-color:#536171}textarea{resize:vertical;min-height:76px}
+.tabs{display:flex;gap:4px}.tab{border-color:transparent;background:none;font-size:11px;color:var(--muted);padding:6px 10px}.tab[aria-pressed=true]{color:var(--lime);background:#222e20}
+.task-list{list-style:none;padding:0 22px;margin:0;flex:1}.task{padding:18px 0;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}.task:last-child{border-bottom:0}
+.check{width:24px;height:24px;border-radius:7px;padding:0;flex-shrink:0;font-size:14px;color:var(--lime);margin-top:3px;background:#111820}.task.done .check{background:#27371f;border-color:#4b6636}
+.task-body{min-width:0;flex:1}.task-title{font-size:13px;font-weight:550;overflow-wrap:anywhere;margin:7px 0 4px}.task.done .task-title{text-decoration:line-through;color:var(--muted)}
+.task-meta{display:flex;gap:9px;align-items:center;font-size:10px;color:var(--muted)}.task-desc{font-size:11px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+.badge{font-size:9px;padding:2px 7px;border:1px solid #354250;border-radius:5px;color:#b0bfcd}.badge.high{color:var(--red);background:#2c1b22;border-color:#4c2b35}.badge.medium{color:var(--amber);background:#28241a;border-color:#443e29}.badge.low{color:var(--blue);background:#182534;border-color:#2c4058}
+.remove{background:none;border:0;padding:4px 6px;font-size:20px;line-height:1;color:#8693a1}.remove:hover:not(:disabled){color:var(--red);background:#302028}
+.empty{text-align:center;padding:65px 20px;color:var(--muted);font-size:12px}.empty b{display:block;font-size:27px;margin-bottom:12px;color:#536171;font-weight:400}
+.panel-footer{border-top:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--muted)}.live{color:var(--lime)}
+.right-column{display:grid;gap:20px;align-content:start}.form-card{padding:21px 22px}.card-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.service-tag{font-size:9px;letter-spacing:1px;color:var(--muted);border:1px solid var(--line);padding:3px 6px;border-radius:5px}
+form{display:grid;gap:12px}label{display:block;font-size:11px;color:#b4bfcb;margin-bottom:6px}.form-card .primary{width:100%;font-size:12px;margin-top:2px}
+.form-caption{font-size:10px;color:var(--muted);margin:12px 0 0}.mail-card{border-color:#354038;background:linear-gradient(145deg,#17201c,#11161c 65%)}
+.mail-card .eyebrow{color:var(--lime)}.mail-card h2{margin:8px 0 5px}.mail-card>p{margin:0 0 18px;color:var(--muted);font-size:11px}.mail-status{font-size:11px;color:var(--muted);margin:13px 0 0;overflow-wrap:anywhere}.mail-status[data-state=sent]{color:var(--lime)}.mail-status[data-state=failed]{color:var(--red)}
+.mail-links{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:10px;color:#a7ba9b}.mail-links a:hover{text-decoration:underline}
+.systems{margin-top:22px;padding:18px 22px;display:grid;grid-template-columns:160px 1fr;align-items:center;gap:22px}.systems h2{font-size:12px}.systems p{margin:4px 0 0;font-size:10px;color:var(--muted)}
+.service-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.service-item{border-left:1px solid var(--line);padding-left:16px}.service-item strong{font-size:11px;font-weight:500}.service-state{font-size:9px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-top:6px}.service-item[data-state=up] .dot{background:var(--lime)}.service-item[data-state=down] .dot{background:var(--red)}
+.bottom{display:flex;justify-content:space-between;gap:20px;margin-top:18px;font-size:10px;color:#738091}.progress-row{display:flex;align-items:center;gap:9px}.progress-row progress{width:100px;height:4px;accent-color:var(--lime)}
+#toast{position:fixed;bottom:24px;right:24px;max-width:min(440px,calc(100vw - 32px));padding:13px 17px;background:#1b2720;border:1px solid #5c7845;border-radius:10px;color:var(--text);font-size:12px;z-index:20;box-shadow:0 15px 45px #0008}#toast[data-error=true]{background:#2c1c23;border-color:#874653}
+dialog{color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:26px;max-width:420px;width:calc(100% - 32px)}dialog::backdrop{background:#000a;backdrop-filter:blur(4px)}dialog p{color:var(--muted);font-size:13px;overflow-wrap:anywhere}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.danger{background:#44262e;color:#ffb7bd;border-color:#6d3743}
+[hidden]{display:none!important}
+@media(min-width:1600px){main{padding-left:48px;padding-right:48px}.task-panel{min-height:600px}}
+@media(max-width:1180px){.sidebar{width:185px;padding:25px 15px}main{margin-left:185px;padding:0 24px 24px}.workspace{grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr)}.systems{grid-template-columns:1fr;gap:16px}.stat{padding:16px}.stat small{font-size:9px}}
+@media(max-width:940px){.sidebar{display:none}main{margin-left:0}.workspace{grid-template-columns:minmax(0,1.4fr) minmax(280px,1fr)}.hero h1{font-size:31px}.hero{padding-top:26px}}
+@media(max-width:720px){main{padding:0 16px 24px}.topbar{height:62px}.breadcrumb{font-size:10px}.hero{align-items:flex-start;flex-direction:column;gap:18px}.hero h1{font-size:30px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat-number{font-size:31px;margin:12px 0 7px}.workspace{grid-template-columns:1fr;gap:16px}.right-column{grid-template-columns:1fr}.task-panel{min-height:380px}.service-list{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:20px}.systems{padding:18px}.service-item{padding-left:10px}.bottom{flex-direction:column;gap:8px}.filter-row select{width:126px}.panel-head,.filters,.task-list{padding-left:16px;padding-right:16px}.hero p{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
-    <div class="wrapper">
-        <header>
-            <div class="logo-group">
-                <h1>Task System Ultra Pro</h1>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Microservices & DevSecOps Platform</p>
-            </div>
-            <div class="service-pills">
-                <div class="pill"><span class="dot"></span> Nginx:80</div>
-                <div class="pill"><span class="dot"></span> Java Core</div>
-                <div class="pill"><span class="dot"></span> Python Fast</div>
-                <div class="pill"><span class="dot"></span> Go Metrics</div>
-            </div>
-        </header>
-        <div class="grid">
-            <div class="card card-java">
-                <h3>⚡ Новая задача (Java Core)</h3>
-                <input type="text" id="title" placeholder="Имя задачи">
-                <input type="text" id="desc" placeholder="Описание задачи">
-                <select id="priority">
-                    <option value="High">Приоритет: High</option>
-                    <option value="Medium">Приоритет: Medium</option>
-                    <option value="Low">Приоритет: Low</option>
-                </select>
-                <button class="btn-java" onclick="createTask()">Добавить в PostgreSQL</button>
-            </div>
-            <div class="card card-py">
-                <h3>🔔 Alert Dispatcher (Python)</h3>
-                <input type="email" id="email" placeholder="admin@enterprise.io">
-                <input type="text" id="msg" placeholder="Текст системного события">
-                <button class="btn-py" onclick="sendNotify()">Отправить в FastAPI</button>
-            </div>
-            <div class="card card-go">
-                <h3>📊 In-Memory Analytics (Go)</h3>
-                <div class="stat-display">
-                    <div class="stat-value" id="analytics">0</div>
-                    <div class="stat-label">Всего задач в системе</div>
-                </div>
-                <button class="btn-go" onclick="loadAnalytics()">Синхронизировать метрики</button>
-            </div>
-        </div>
-        <div class="tasks-container">
-            <div class="tasks-header">
-                <h3>Реестр задач</h3>
-                <button style="width: auto; padding: 6px 14px; background: transparent; border: 1px solid var(--surface-border); color: var(--text-muted);" onclick="loadTasks()">Обновить</button>
-            </div>
-            <ul id="taskList" class="task-list"></ul>
-        </div>
+<aside class="sidebar" aria-label="Навигация">
+  <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">⌘</span> task / console</a>
+  <div class="project"><small>РАБОЧЕЕ ПРОСТРАНСТВО</small><strong>Task Service</strong><small>Локальная среда · v1.0</small></div>
+  <nav><a class="active" href="#overview"><span aria-hidden="true">▦</span> Обзор</a><a href="#tasks"><span aria-hidden="true">☑</span> Задачи</a><a href="#mail"><span aria-hidden="true">↗</span> Уведомления</a><a href="#systems"><span aria-hidden="true">⌁</span> Сервисы</a></nav>
+  <div class="side-foot"><span class="avatar">TS</span> Локальный проект<p>Полиглотная платформа<br>Java · Python · Go</p></div>
+</aside>
+<main id="overview">
+  <header class="topbar"><div class="breadcrumb">Рабочее пространство <span aria-hidden="true"> / </span> <strong>Обзор</strong></div><div class="env"><span class="dot"></span> Development</div></header>
+  <section class="hero" aria-labelledby="pageTitle"><div><div class="eyebrow">CONTROL PLANE / TASK SERVICE</div><h1 id="pageTitle">Работа под контролем.</h1><p>Задачи, уведомления и состояние платформы в одном пространстве.</p></div><a id="inboxLink" class="inbox" href="http://localhost:8025/mail/" target="_blank" rel="noopener noreferrer">Открыть Mailpit Inbox <span aria-hidden="true">↗</span></a></section>
+  <section class="stats" aria-label="Сводка задач">
+    <article class="card stat"><div class="stat-label">Всего задач <span class="stat-symbol">▦</span></div><div class="stat-number" id="totalCount">—</div><small>Актуальный снимок из базы</small></article>
+    <article class="card stat"><div class="stat-label">В работе <span class="stat-symbol">◷</span></div><div class="stat-number" id="activeCount">—</div><small>Ожидают завершения</small></article>
+    <article class="card stat accent"><div class="stat-label">Завершено <span class="stat-symbol">✓</span></div><div class="stat-number" id="doneCount">—</div><small>Статус сохранён на сервере</small></article>
+    <article class="card stat"><div class="stat-label">События создания <span class="stat-symbol">⌁</span></div><div class="stat-number" id="goCount">—</div><small>Go · с последнего запуска сервиса</small></article>
+  </section>
+  <div class="workspace">
+    <section class="card task-panel" id="tasks" aria-labelledby="tasksTitle">
+      <div class="panel-head"><div><h2 id="tasksTitle">Реестр задач</h2><p>От идеи до завершения.</p></div><button id="refreshButton" class="ghost small-btn" type="button">↻ Обновить</button></div>
+      <div class="filters"><div class="filter-row"><input id="search" type="search" aria-label="Поиск задач" placeholder="Поиск по названию или описанию"><select id="priorityFilter" aria-label="Фильтр по приоритету"><option value="all">Все уровни</option><option value="High">Высокий</option><option value="Medium">Средний</option><option value="Low">Низкий</option></select></div>
+        <div class="tabs" role="group" aria-label="Статус задачи"><button class="tab" data-filter="all" aria-pressed="true">Все</button><button class="tab" data-filter="active" aria-pressed="false">В работе</button><button class="tab" data-filter="done" aria-pressed="false">Завершённые</button></div></div>
+      <ul class="task-list" id="taskList"><li class="empty">Получаем задачи…</li></ul>
+      <div class="panel-footer"><span id="visibleCount">Ожидание данных</span><span id="syncStatus" aria-live="polite">Подключение…</span></div>
+    </section>
+    <div class="right-column">
+      <section class="card form-card" aria-labelledby="createTitle"><div class="card-heading"><h2 id="createTitle">Новая задача</h2><span class="service-tag">TASKS</span></div>
+        <form id="taskForm"><div><label for="title">Название задачи</label><input id="title" name="title" maxlength="255" required placeholder="Что нужно сделать?"></div><div><label for="description">Описание</label><textarea id="description" name="description" maxlength="255" placeholder="Контекст, детали и ожидаемый результат"></textarea></div><div><label for="priority">Приоритет</label><select id="priority" name="priority"><option value="Medium">Средний</option><option value="High">Высокий</option><option value="Low">Низкий</option></select></div><button id="createButton" class="primary" type="submit">+ Создать задачу</button></form>
+        <p class="form-caption">Задачи и статусы сохраняются между сеансами.</p>
+      </section>
+      <section class="card form-card mail-card" id="mail" aria-labelledby="mailTitle"><div class="eyebrow">SMTP DISPATCH</div><h2 id="mailTitle">Письмо без лишних настроек.</h2><p>Отправка по SMTP с подтверждением приёма.</p>
+        <form id="mailForm"><div><label for="email">Получатель</label><input id="email" name="email" type="email" maxlength="254" required value="professor@example.com"></div><div><label for="subject">Тема</label><input id="subject" name="subject" maxlength="180" required value="Демонстрация Task Console"></div><div><label for="message">Сообщение</label><textarea id="message" name="message" maxlength="10000" required placeholder="Напишите сообщение преподавателю"></textarea></div><button id="sendButton" type="submit">Отправить письмо <span aria-hidden="true">↗</span></button></form>
+        <p id="mailStatus" class="mail-status" aria-live="polite">По умолчанию письма поступают в Mailpit.</p><div class="mail-links"><a href="/mail/" target="_blank" rel="noopener noreferrer">Inbox через шлюз ↗</a><span>Реальная передача SMTP</span></div>
+      </section>
     </div>
-    <div id="toast"></div>
-    <script>
-        function showToast(text, color = '#03dac6') {
-            const t = document.getElementById('toast');
-            t.innerText = text;
-            t.style.borderColor = color;
-            t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 3000);
-        }
-        async function createTask() {
-            const title = document.getElementById('title').value.trim();
-            const description = document.getElementById('desc').value.trim();
-            const priority = document.getElementById('priority').value;
-            if(!title) return showToast('Введите название задачи', '#ff7597');
-            try {
-                const res = await fetch('/tasks', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({title, description, priority})
-                });
-                if(res.ok) {
-                    showToast('Задача сохранена в PostgreSQL!');
-                    document.getElementById('title').value = '';
-                    document.getElementById('desc').value = '';
-                    fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
-                    loadTasks();
-                    setTimeout(loadAnalytics, 250);
-                }
-            } catch(e) { showToast('Ошибка сети', '#ff7597'); }
-        }
-        async function sendNotify() {
-            const email = document.getElementById('email').value.trim();
-            const message = document.getElementById('msg').value.trim();
-            if(!email || !message) return showToast('Заполните все поля алерта', '#ff7597');
-            try {
-                const res = await fetch('/notify', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, message})
-                });
-                if(res.ok) showToast('Python FastAPI залогировал алерт!');
-            } catch(e) { showToast('Ошибка вызова шлюза', '#ff7597'); }
-        }
-        async function loadAnalytics() {
-            try {
-                const res = await fetch('/analytics');
-                const data = await res.json();
-                document.getElementById('analytics').innerText = data.total_tasks;
-            } catch(e) { document.getElementById('analytics').innerText = '--'; }
-        }
-        async function loadTasks() {
-            try {
-                const res = await fetch('/tasks');
-                const tasks = await res.json();
-                const list = document.getElementById('taskList');
-                list.innerHTML = '';
-                if(tasks.length === 0) {
-                    list.innerHTML = '<li style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.85rem;">Задач пока нет</li>';
-                    return;
-                }
-                tasks.forEach(t => {
-                    list.innerHTML += `
-                        <li class="task-item">
-                            <div class="task-info">
-                                <h4>${t.title}</h4>
-                                <p>${t.description || 'Без описания'}</p>
-                            </div>
-                            <span class="badge badge-${t.priority}">${t.priority}</span>
-                        </li>`;
-                });
-            } catch(e) {}
-        }
-        loadTasks();
-        loadAnalytics();
-    </script>
-</body>
-</html><!DOCTYPE html>
+  </div>
+  <section class="card systems" id="systems" aria-labelledby="systemsTitle"><div><h2 id="systemsTitle">Состояние сервисов</h2><p>Проверка каждые 5 секунд</p></div><div class="service-list">
+    <div class="service-item" id="serviceGateway" data-state="unknown"><strong>Gateway</strong><div class="service-state"><span class="dot"></span><span>Проверка…</span></div></div>
+    <div class="service-item" id="serviceApi" data-state="unknown"><strong>Task API + DB</strong><div class="service-state"><span class="dot"></span><span>Проверка…</span></div></div>
+    <div class="service-item" id="serviceNotifications" data-state="unknown"><strong>Notifications</strong><div class="service-state"><span class="dot"></span><span>Проверка…</span></div></div>
+    <div class="service-item" id="serviceGo" data-state="unknown"><strong>Analytics</strong><div class="service-state"><span class="dot"></span><span>Проверка…</span></div></div>
+    <div class="service-item" id="serviceMailpit" data-state="unknown"><strong>Mailpit Inbox</strong><div class="service-state"><span class="dot"></span><span>Проверка…</span></div></div>
+  </div></section>
+  <footer class="bottom"><span>Task Console / Локальная среда разработки</span><div class="progress-row"><span id="progressText">Выполнено —</span><progress id="progress" max="100" value="0" aria-label="Доля завершённых задач"></progress></div></footer>
+</main>
+<dialog id="deleteDialog" aria-labelledby="deleteTitle"><h2 id="deleteTitle">Удалить задачу?</h2><p id="deleteText"></p><p>Восстановление через интерфейс недоступно.</p><div class="dialog-actions"><button id="cancelDelete" type="button" class="ghost">Отмена</button><button id="confirmDelete" type="button" class="danger">Удалить задачу</button></div></dialog>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const state = {tasks: [], loaded: false, filter: "all", mutating: false, syncing: false, pendingDelete: null, taskRevision: 0};
+const priorityNames = {High: "Высокий", Medium: "Средний", Low: "Низкий"};
+let toastTimer;
+const inbox = new URL("/mail/", window.location.href);
+inbox.protocol = "http:"; inbox.port = "8025"; $("inboxLink").href = inbox.href;
 
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task System Ultra Pro Dashboard</title>
-    <style>
-        :root {
-            --bg-base: #0a0c10;
-            --surface: rgba(22, 27, 34, 0.75);
-            --surface-border: rgba(255, 255, 255, 0.08);
-            --accent-java: #bb86fc;
-            --accent-go: #03dac6;
-            --accent-python: #ff7597;
-            --text-primary: #f0f6fc;
-            --text-muted: #8b949e;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: radial-gradient(circle at top right, #17152b 0%, var(--bg-base) 60%); color: var(--text-primary); min-height: 100vh; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; }
-        .wrapper { width: 100%; max-width: 960px; display: flex; flex-direction: column; gap: 24px; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--surface-border); padding-bottom: 18px; }
-        .logo-group h1 { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #bb86fc, #03dac6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .service-pills { display: flex; gap: 8px; flex-wrap: wrap; }
-        .pill { font-size: 0.75rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--surface-border); background: var(--surface); display: flex; align-items: center; gap: 6px; }
-        .dot { width: 6px; height: 6px; border-radius: 50%; background: #03dac6; box-shadow: 0 0 8px #03dac6; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--surface); border: 1px solid var(--surface-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 22px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-        .card h3 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
-        .card-java h3 { color: var(--accent-java); }
-        .card-py h3 { color: var(--accent-python); }
-        .card-go h3 { color: var(--accent-go); }
-        input, select { width: 100%; padding: 12px 14px; background: rgba(13, 17, 23, 0.8); border: 1px solid var(--surface-border); border-radius: 8px; color: var(--text-primary); outline: none; transition: 0.2s; font-size: 0.875rem; }
-        input:focus, select:focus { border-color: var(--accent-java); box-shadow: 0 0 0 2px rgba(187, 134, 252, 0.2); }
-        button { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: all 0.2s ease; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 0.875rem; }
-        .btn-java { background: var(--accent-java); color: #0a0c10; }
-        .btn-java:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-py { background: var(--accent-python); color: #0a0c10; }
-        .btn-py:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-go { background: rgba(3, 218, 198, 0.1); color: var(--accent-go); border: 1px solid rgba(3, 218, 198, 0.3); }
-        .btn-go:hover { background: rgba(3, 218, 198, 0.2); }
-        .stat-display { text-align: center; padding: 12px; }
-        .stat-value { font-size: 2.8rem; font-weight: 700; color: var(--accent-go); line-height: 1; }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-        .tasks-container { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 16px; padding: 22px; backdrop-filter: blur(12px); }
-        .tasks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .task-list { display: flex; flex-direction: column; gap: 8px; list-style: none; }
-        .task-item { background: rgba(13, 17, 23, 0.5); border: 1px solid var(--surface-border); padding: 14px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .task-info h4 { font-size: 0.95rem; font-weight: 600; }
-        .task-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
-        .badge { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-        .badge-High { background: rgba(255, 117, 151, 0.15); color: #ff7597; border: 1px solid rgba(255, 117, 151, 0.3); }
-        .badge-Medium { background: rgba(255, 193, 7, 0.15); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
-        .badge-Low { background: rgba(3, 218, 198, 0.15); color: #03dac6; border: 1px solid rgba(3, 218, 198, 0.3); }
-        #toast { position: fixed; bottom: 24px; right: 24px; background: rgba(22, 27, 34, 0.95); border: 1px solid var(--accent-go); color: var(--text-primary); padding: 12px 20px; border-radius: 10px; display: none; box-shadow: 0 8px 24px rgba(0,0,0,0.5); font-size: 0.875rem; z-index: 1000; }
-    </style>
-</head>
-<body>
-    <div class="wrapper">
-        <header>
-            <div class="logo-group">
-                <h1>Task System Ultra Pro</h1>
-                <p style="font-size: 0.8rem; color: var(--text-muted);">Microservices & DevSecOps Platform</p>
-            </div>
-            <div class="service-pills">
-                <div class="pill"><span class="dot"></span> Nginx:80</div>
-                <div class="pill"><span class="dot"></span> Java Core</div>
-                <div class="pill"><span class="dot"></span> Python Fast</div>
-                <div class="pill"><span class="dot"></span> Go Metrics</div>
-            </div>
-        </header>
-        <div class="grid">
-            <div class="card card-java">
-                <h3>⚡ Новая задача (Java Core)</h3>
-                <input type="text" id="title" placeholder="Имя задачи">
-                <input type="text" id="desc" placeholder="Описание задачи">
-                <select id="priority">
-                    <option value="High">Приоритет: High</option>
-                    <option value="Medium">Приоритет: Medium</option>
-                    <option value="Low">Приоритет: Low</option>
-                </select>
-                <button class="btn-java" onclick="createTask()">Добавить в PostgreSQL</button>
-            </div>
-            <div class="card card-py">
-                <h3>🔔 Alert Dispatcher (Python)</h3>
-                <input type="email" id="email" placeholder="admin@enterprise.io">
-                <input type="text" id="msg" placeholder="Текст системного события">
-                <button class="btn-py" onclick="sendNotify()">Отправить в FastAPI</button>
-            </div>
-            <div class="card card-go">
-                <h3>📊 In-Memory Analytics (Go)</h3>
-                <div class="stat-display">
-                    <div class="stat-value" id="analytics">0</div>
-                    <div class="stat-label">Всего задач в системе</div>
-                </div>
-                <button class="btn-go" onclick="loadAnalytics()">Синхронизировать метрики</button>
-            </div>
-        </div>
-        <div class="tasks-container">
-            <div class="tasks-header">
-                <h3>Реестр задач</h3>
-                <button style="width: auto; padding: 6px 14px; background: transparent; border: 1px solid var(--surface-border); color: var(--text-muted);" onclick="loadTasks()">Обновить</button>
-            </div>
-            <ul id="taskList" class="task-list"></ul>
-        </div>
-    </div>
-    <div id="toast"></div>
-    <script>
-        function showToast(text, color = '#03dac6') {
-            const t = document.getElementById('toast');
-            t.innerText = text;
-            t.style.borderColor = color;
-            t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 3000);
-        }
-        async function createTask() {
-            const title = document.getElementById('title').value.trim();
-            const description = document.getElementById('desc').value.trim();
-            const priority = document.getElementById('priority').value;
-            if(!title) return showToast('Введите название задачи', '#ff7597');
-            try {
-                const res = await fetch('/tasks', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({title, description, priority})
-                });
-                if(res.ok) {
-                    showToast('Задача сохранена в PostgreSQL!');
-                    document.getElementById('title').value = '';
-                    document.getElementById('desc').value = '';
-                    fetch('/analytics/increment', { method: 'POST' }).catch(() => {});
-                    loadTasks();
-                    setTimeout(loadAnalytics, 250);
-                }
-            } catch(e) { showToast('Ошибка сети', '#ff7597'); }
-        }
-        async function sendNotify() {
-            const email = document.getElementById('email').value.trim();
-            const message = document.getElementById('msg').value.trim();
-            if(!email || !message) return showToast('Заполните все поля алерта', '#ff7597');
-            try {
-                const res = await fetch('/notify', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({email, message})
-                });
-                if(res.ok) showToast('Python FastAPI залогировал алерт!');
-            } catch(e) { showToast('Ошибка вызова шлюза', '#ff7597'); }
-        }
-        async function loadAnalytics() {
-            try {
-                const res = await fetch('/analytics');
-                const data = await res.json();
-                document.getElementById('analytics').innerText = data.total_tasks;
-            } catch(e) { document.getElementById('analytics').innerText = '--'; }
-        }
-        async function loadTasks() {
-            try {
-                const res = await fetch('/tasks');
-                const tasks = await res.json();
-                const list = document.getElementById('taskList');
-                list.innerHTML = '';
-                if(tasks.length === 0) {
-                    list.innerHTML = '<li style="text-align:center; padding:16px; color:var(--text-muted); font-size:0.85rem;">Задач пока нет</li>';
-                    return;
-                }
-                tasks.forEach(t => {
-                    list.innerHTML += `
-                        <li class="task-item">
-                            <div class="task-info">
-                                <h4>${t.title}</h4>
-                                <p>${t.description || 'Без описания'}</p>
-                            </div>
-                            <span class="badge badge-${t.priority}">${t.priority}</span>
-                        </li>`;
-                });
-            } catch(e) {}
-        }
-        loadTasks();
-        loadAnalytics();
-    </script>
+function toast(message, error = false) {
+  const el = $("toast"); clearTimeout(toastTimer); el.textContent = message;
+  el.dataset.error = String(error); el.hidden = false;
+  toastTimer = setTimeout(() => { el.hidden = true; }, 6500);
+}
+function service(name, up) {
+  const el = $("service" + name); el.dataset.state = up ? "up" : "down";
+  el.querySelector(".service-state span:last-child").textContent = up ? "Доступен" : "Недоступен";
+}
+async function request(path, options = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch(path, {cache: "no-store", ...options,
+      headers: {...(options.body ? {"Content-Type": "application/json"} : {}), ...options.headers},
+      signal: controller.signal});
+    const text = await response.text();
+    let data = null; try { data = text ? JSON.parse(text) : null; } catch {}
+    if (!response.ok) {
+      const detail = typeof data?.detail === "string" ? data.detail : data?.message;
+      throw new Error(detail || (response.status === 429 ? "Слишком много запросов. Повторите позже." : "Ошибка HTTP " + response.status));
+    }
+    return data;
+  } catch (error) {
+    if (error.name === "AbortError") throw new Error("Сервис не ответил вовремя");
+    throw error;
+  } finally { clearTimeout(timer); }
+}
+function textElement(tag, className, text) {
+  const el = document.createElement(tag); el.className = className; el.textContent = text; return el;
+}
+function renderTasks() {
+  if (!state.loaded) return;
+  const query = $("search").value.toLocaleLowerCase("ru").trim();
+  const priority = $("priorityFilter").value;
+  const visible = state.tasks.filter(t => (priority === "all" || t.priority === priority)
+    && (state.filter === "all" || (state.filter === "done" ? t.completed === true : t.completed !== true))
+    && (String(t.title || "") + " " + String(t.description || "")).toLocaleLowerCase("ru").includes(query));
+  const list = $("taskList"); list.replaceChildren();
+  visible.forEach(task => {
+    const row = textElement("li", "task" + (task.completed ? " done" : ""), "");
+    const complete = textElement("button", "check", task.completed ? "✓" : "");
+    complete.type = "button"; complete.disabled = state.mutating;
+    complete.setAttribute("aria-label", (task.completed ? "Вернуть в работу: " : "Завершить: ") + task.title);
+    complete.setAttribute("aria-pressed", String(task.completed === true));
+    complete.addEventListener("click", () => changeCompletion(task));
+    const body = textElement("div", "task-body", "");
+    const meta = textElement("div", "task-meta", "");
+    meta.append(textElement("span", "mono", "#" + task.id));
+    const badgeClass = {High: "high", Medium: "medium", Low: "low"}[task.priority] || "";
+    meta.append(textElement("span", "badge " + badgeClass, priorityNames[task.priority] || "Без приоритета"));
+    if (task.completed) meta.append(textElement("span", "", "Завершена"));
+    body.append(meta, textElement("h3", "task-title", task.title || "Без названия"),
+      textElement("p", "task-desc", task.description || "Без описания"));
+    const remove = textElement("button", "remove", "×"); remove.type = "button";
+    remove.disabled = state.mutating; remove.setAttribute("aria-label", "Удалить: " + task.title);
+    remove.addEventListener("click", () => {
+      state.pendingDelete = task.id; $("deleteText").textContent = task.title;
+      $("deleteDialog").showModal();
+    });
+    row.append(complete, body, remove); list.append(row);
+  });
+  if (!visible.length) {
+    const empty = textElement("li", "empty", "");
+    empty.append(textElement("b", "", "◇"), textElement("span", "", state.tasks.length
+      ? "Подходящих задач нет. Измените фильтры." : "Пока чистый лист. Создайте первую задачу."));
+    list.append(empty);
+  }
+  const done = state.tasks.filter(t => t.completed === true).length;
+  $("totalCount").textContent = state.tasks.length; $("activeCount").textContent = state.tasks.length - done;
+  $("doneCount").textContent = done; $("visibleCount").textContent = "Показано " + visible.length + " из " + state.tasks.length;
+  const percent = state.tasks.length ? Math.round(done / state.tasks.length * 100) : 0;
+  $("progress").value = percent; $("progressText").textContent = "Выполнено " + percent + "%";
+}
+async function loadTasks() {
+  const revision = ++state.taskRevision;
+  try {
+    const tasks = await request("/tasks");
+    if (revision !== state.taskRevision) return;
+    if (!Array.isArray(tasks)) throw new Error("Некорректный ответ API");
+    tasks.sort((a, b) => Number(b.id) - Number(a.id));
+    const changed = !state.loaded || JSON.stringify(tasks) !== JSON.stringify(state.tasks);
+    state.tasks = tasks; state.loaded = true;
+    if (changed) renderTasks(); service("Api", true);
+    $("syncStatus").className = "live";
+    $("syncStatus").textContent = "● " + new Date().toLocaleTimeString("ru-RU");
+  } catch (error) {
+    if (revision !== state.taskRevision) return;
+    service("Api", false); $("syncStatus").className = "";
+    $("syncStatus").textContent = state.loaded ? "Снимок устарел · API недоступен" : "API недоступен";
+    if (!state.loaded) $("taskList").replaceChildren(textElement("li", "empty", "Не удалось загрузить задачи. Нажмите «Обновить»."));
+  }
+}
+async function loadAnalytics() {
+  try {
+    const data = await request("/analytics");
+    if (!Number.isInteger(data?.total_tasks) || data.total_tasks < 0) throw new Error("Некорректная метрика");
+    $("goCount").textContent = data.total_tasks; service("Go", true);
+  } catch { $("goCount").textContent = "—"; service("Go", false); }
+}
+async function checkServices() {
+  await Promise.all([["Gateway", "/health/gateway"], ["Notifications", "/health/notifications"],
+    ["Mailpit", "/mail/readyz"]].map(async ([name, path]) => {
+      try { await request(path); service(name, true); } catch { service(name, false); }
+    }));
+}
+async function refreshAll() {
+  if (state.syncing || state.mutating) return;
+  state.syncing = true; $("refreshButton").disabled = true;
+  try { await Promise.allSettled([loadTasks(), loadAnalytics(), checkServices()]); }
+  finally { state.syncing = false; $("refreshButton").disabled = false; }
+}
+async function mutate(action, successMessage) {
+  if (state.mutating) return;
+  state.mutating = true; ++state.taskRevision;
+  $("createButton").disabled = true; renderTasks();
+  try {
+    const warning = await action(); toast(typeof warning === "string" ? warning : successMessage, typeof warning === "string");
+  } catch (error) { toast(error.message || "Сетевая ошибка", true); }
+  finally {
+    await Promise.allSettled([loadTasks(), loadAnalytics()]);
+    state.mutating = false; $("createButton").disabled = false;
+    if (state.loaded) renderTasks();
+  }
+}
+$("taskForm").addEventListener("submit", event => {
+  event.preventDefault();
+  if (!$("title").value.trim()) return toast("Введите название задачи", true);
+  mutate(async () => {
+    await request("/tasks", {method: "POST", body: JSON.stringify({
+      title: $("title").value.trim(), description: $("description").value.trim(), priority: $("priority").value})});
+    $("taskForm").reset();
+    try { await request("/analytics/increment", {method: "POST"}); }
+    catch { return "Задача сохранена. Go-сервис не подтвердил событие."; }
+  }, "Задача создана");
+});
+async function changeCompletion(task) {
+  await mutate(() => request("/tasks/" + encodeURIComponent(task.id) + "/completion",
+    {method: "PATCH", body: JSON.stringify({completed: !task.completed})}),
+    task.completed ? "Задача возвращена в работу" : "Задача завершена");
+}
+$("cancelDelete").addEventListener("click", () => $("deleteDialog").close());
+$("confirmDelete").addEventListener("click", () => {
+  const id = state.pendingDelete; $("deleteDialog").close();
+  if (id !== null) mutate(() => request("/tasks/" + encodeURIComponent(id), {method: "DELETE"}), "Задача удалена");
+});
+$("deleteDialog").addEventListener("close", () => { state.pendingDelete = null; });
+$("search").addEventListener("input", renderTasks);
+$("priorityFilter").addEventListener("change", renderTasks);
+document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+  state.filter = button.dataset.filter;
+  document.querySelectorAll("[data-filter]").forEach(b => b.setAttribute("aria-pressed", String(b === button)));
+  if (state.loaded) renderTasks();
+}));
+$("refreshButton").addEventListener("click", refreshAll);
+function mailStatus(text, status = "") {
+  $("mailStatus").textContent = text; $("mailStatus").dataset.state = status;
+}
+$("mailForm").addEventListener("submit", async event => {
+  event.preventDefault(); if ($("sendButton").disabled) return;
+  if (!$("message").value.trim() || !$("subject").value.trim()) return toast("Введите тему и текст письма", true);
+  $("sendButton").disabled = true; mailStatus("Передаём письмо в очередь…");
+  try {
+    const result = await request("/notify", {method: "POST", body: JSON.stringify({
+      email: $("email").value.trim(), subject: $("subject").value.trim(), message: $("message").value.trim()})});
+    if (!result?.notification_id) throw new Error("Сервис не вернул идентификатор отправки");
+    mailStatus("Принято в очередь. Проверяем результат SMTP…");
+    for (let attempt = 0; attempt < 30; attempt++) {
+      const job = await request("/notify/" + encodeURIComponent(result.notification_id));
+      if (job?.status === "sent") {
+        mailStatus("✓ SMTP-сервер принял письмо. Для локальной отправки откройте Inbox.", "sent");
+        toast("SMTP-отправка подтверждена"); return;
+      }
+      if (job?.status === "failed") throw new Error(job.error || "SMTP-отправка завершилась ошибкой");
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    mailStatus("Ожидание затянулось. Проверьте Inbox и логи; повторно письмо не отправлялось.");
+  } catch (error) {
+    mailStatus(error.message || "Не удалось отправить письмо", "failed"); toast(error.message || "Ошибка отправки", true);
+  } finally { $("sendButton").disabled = false; }
+});
+async function tick() {
+  if (!document.hidden) await refreshAll();
+  setTimeout(tick, 5000);
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshAll(); });
+tick();
+</script>
 </body>
 </html>
