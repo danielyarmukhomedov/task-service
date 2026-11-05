@@ -1,66 +1,127 @@
-version: "3.9"
-
 services:
-  # --- API GATEWAY + ВЕБ ИНТЕРФЕЙС ---
   gateway:
     build: ./gateway
+    restart: unless-stopped
     ports:
-      - "80:80"
+      - "127.0.0.1:8088:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html # Монтируем HTML папку внутрь веб-сервера
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - api
-      - notifications
-      - analytics
-    networks:
-      - app-network
+      api:
+        condition: service_healthy
+      notifications:
+        condition: service_healthy
+      analytics:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/health/gateway"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [app-network]
 
-  # --- СЕРВИС ЗАДАЧ (Java Spring Boot) ---
   api:
     build: .
+    restart: unless-stopped
     environment:
-      - DB_HOST=db
-      - DB_NAME=app
-      - DB_USER=postgres
-      - DB_PASSWORD=1234
+      DB_HOST: db
+      DB_NAME: app
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD:-1234}
     depends_on:
-      - db
-      - redis
-    networks:
-      - app-network
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    networks: [app-network]
 
-  # --- СЕРВИС УВЕДОМЛЕНИЙ (Python FastAPI) ---
   notifications:
     build: ./notification-service
-    networks:
-      - app-network
+    restart: unless-stopped
+    environment:
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_SSL: ${SMTP_SSL:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-}
+      SMTP_TIMEOUT: ${SMTP_TIMEOUT:-10}
+    depends_on:
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=4)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [app-network]
 
-  # --- СЕРВИС АНАЛИТИКИ (Чистый GoLang) ---
   analytics:
     build: ./analytics-service
-    networks:
-      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9000/analytics"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [app-network]
 
-  # --- БАЗА ДАННЫХ ---
+  mailpit:
+    image: axllent/mailpit:v1.32.0
+    restart: unless-stopped
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_WEBROOT: mail
+      MP_MAX_MESSAGES: "1000"
+      MP_DISABLE_VERSION_CHECK: "true"
+    volumes:
+      - mailpit_data:/data
+    ports:
+      - "127.0.0.1:8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [app-network]
+
   db:
     image: postgres:16
+    restart: unless-stopped
     environment:
-      - POSTGRES_DB=app
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
+      POSTGRES_DB: app
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
     volumes:
       - db_data:/var/lib/postgresql/data
-    networks:
-      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [app-network]
 
-  # --- КЭШ ---
+  # Java caching is not implemented yet. Container retained for compatibility.
   redis:
-    image: redis:alpine
-    networks:
-      - app-network
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks: [app-network]
 
 volumes:
   db_data:
+  mailpit_data:
 
 networks:
   app-network:
