@@ -1,0 +1,9 @@
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.27 s - in com.example.taskservice.TaskApiTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Finished at: 2026-11-11T12:42:17+07:00
+nginx: the configuration file /workspace/scratch/489c9debe0e4/stack-l8a807yu/nginx.conf syntax is ok
+nginx: configuration file /workspace/scratch/489c9debe0e4/stack-l8a807yu/nginx.conf test is successful
+Browser checks passed: create, complete/reload, delete, filters, XSS, SMTP, Mailpit UI/WS, failure/recovery, mobile overflow
+README curl examples passed: ['200', '200', '200', '200', '204', '202', '200']
+Local integration passed: Nginx + Java/H2 + Python + Go + Mailpit
