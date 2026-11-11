@@ -22,7 +22,7 @@ services:
     networks: [app-network]
 
   api:
-    build: .
+    build: ./api-service
     restart: unless-stopped
     environment:
       DB_HOST: db

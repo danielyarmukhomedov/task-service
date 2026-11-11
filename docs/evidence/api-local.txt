@@ -1,0 +1,36 @@
+Task Service verification — 2026-11-11T05:43:32.217080+00:00
+READY http://127.0.0.1:18880/health/gateway
+READY http://127.0.0.1:18880/health/api
+READY http://127.0.0.1:18880/health/notifications
+READY http://127.0.0.1:18880/analytics
+READY http://127.0.0.1:18880/mail/readyz
+READY http://127.0.0.1:18025/mail/readyz
+POST http://127.0.0.1:18880/tasks -> HTTP 201
+{"completed": false, "description": "Создание задачи через HTTP API", "id": 5, "priority": "High", "title": "Проверка проекта 03e63a9cbc6e"}
+PUT http://127.0.0.1:18880/tasks/5 -> HTTP 200
+{"completed": false, "description": "Изменение названия и приоритета", "id": 5, "priority": "Low", "title": "Обновлённая задача 03e63a9cbc6e"}
+PATCH http://127.0.0.1:18880/tasks/5/completion -> HTTP 200
+{"completed": true, "description": "Изменение названия и приоритета", "id": 5, "priority": "Low", "title": "Обновлённая задача 03e63a9cbc6e"}
+GET http://127.0.0.1:18880/tasks -> HTTP 200
+PASS create, read, update and completion
+POST http://127.0.0.1:18880/tasks -> HTTP 400
+POST http://127.0.0.1:18880/tasks -> HTTP 400
+PASS invalid task input returns HTTP 400
+GET http://127.0.0.1:18880/analytics -> HTTP 200
+POST http://127.0.0.1:18880/analytics/increment -> HTTP 200
+GET http://127.0.0.1:18880/analytics -> HTTP 200
+{"analytics_after": 5, "analytics_before": 4}
+PASS Go analytics
+POST http://127.0.0.1:18880/notify -> HTTP 202
+{"created_at": 1794375812.2945342, "notification_id": "6d300489-edce-47d5-b521-62a09e524c1b", "sent_to": "professor@example.com", "status": "queued"}
+GET http://127.0.0.1:18880/notify/6d300489-edce-47d5-b521-62a09e524c1b -> HTTP 200
+GET http://127.0.0.1:18880/notify/6d300489-edce-47d5-b521-62a09e524c1b -> HTTP 200
+{"created_at": 1794375812.2945342, "finished_at": 1794375812.3004854, "notification_id": "6d300489-edce-47d5-b521-62a09e524c1b", "sent_to": "professor@example.com", "status": "sent"}
+GET http://127.0.0.1:18025/mail/api/v1/messages -> HTTP 200
+PASS SMTP accepted and message found in Mailpit
+SKIP container recreation: use --check-persistence with Docker Compose
+DELETE http://127.0.0.1:18880/tasks/5 -> HTTP 204
+GET http://127.0.0.1:18880/tasks -> HTTP 200
+DELETE http://127.0.0.1:18880/tasks/5 -> HTTP 404
+PASS delete and repeated delete returns HTTP 404
+RESULT: PASS
